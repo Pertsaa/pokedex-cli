@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Pertsaa/pokedex-cli/internal/pokeapi"
 )
@@ -25,7 +26,7 @@ func main() {
 	commands := getCommands()
 
 	config := &Config{
-		API: pokeapi.New(),
+		API: pokeapi.New(5 * time.Minute),
 	}
 
 	for {
