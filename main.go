@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Pertsaa/pokedex-cli/internal/pokeapi"
@@ -13,7 +14,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(c *Config) error
+	callback    func(c *Config, args ...string) error
 }
 
 type Config struct {
@@ -35,7 +36,15 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 
 		scanner.Scan()
-		command := scanner.Text()
+		input := scanner.Text()
+
+		split := strings.Split(input, " ")
+		command := split[0]
+		args := []string{}
+
+		if len(split) > 1 {
+			args = split[1:]
+		}
 
 		if _, ok := commands[command]; !ok {
 			fmt.Printf("Command not found: %s\n", command)
@@ -43,7 +52,7 @@ func main() {
 			continue
 		}
 
-		err := commands[command].callback(config)
+		err := commands[command].callback(config, args...)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -72,10 +81,15 @@ func getCommands() map[string]cliCommand {
 			description: "Displays previous 20 location areas",
 			callback:    commandMapB,
 		},
+		"explore": {
+			name:        "explore <area>",
+			description: "Explore area for pokemon",
+			callback:    commandExplore,
+		},
 	}
 }
 
-func commandHelp(c *Config) error {
+func commandHelp(c *Config, args ...string) error {
 	fmt.Print("\nWelcome to the Pokedex!\n")
 	fmt.Print("\nUsage:\n\n")
 
@@ -90,12 +104,12 @@ func commandHelp(c *Config) error {
 	return nil
 }
 
-func commandExit(c *Config) error {
+func commandExit(c *Config, args ...string) error {
 	os.Exit(0)
 	return nil
 }
 
-func commandMap(c *Config) error {
+func commandMap(c *Config, args ...string) error {
 	resp, err := c.API.GetLocationAreas(c.Next)
 	if err != nil {
 		return err
@@ -111,7 +125,7 @@ func commandMap(c *Config) error {
 	return nil
 }
 
-func commandMapB(c *Config) error {
+func commandMapB(c *Config, args ...string) error {
 	if c.Previous == nil {
 		return errors.New("No previous areas")
 	}
@@ -126,6 +140,24 @@ func commandMapB(c *Config) error {
 
 	for _, area := range resp.Results {
 		fmt.Println(area.Name)
+	}
+
+	return nil
+}
+
+func commandExplore(c *Config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("Invalid args")
+	}
+
+	resp, err := c.API.GetAreaEncounters(args[0])
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Found Pokemon:")
+	for _, encounter := range resp.Encounters {
+		fmt.Printf("- %s\n", encounter.Pokemon.Name)
 	}
 
 	return nil

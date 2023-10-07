@@ -50,6 +50,35 @@ func (p *PokeApi) GetLocationAreas(pageURL *string) (*LocationAreaResponse, erro
 	return &lr, nil
 }
 
+type AreaEncountersResponse struct {
+	Encounters []PokemonEncounter `json:"pokemon_encounters"`
+}
+
+type PokemonEncounter struct {
+	Pokemon Pokemon `json:"pokemon"`
+}
+
+type Pokemon struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+func (p *PokeApi) GetAreaEncounters(area string) (*AreaEncountersResponse, error) {
+	url := "https://pokeapi.co/api/v2/location-area/" + area
+
+	bytes, err := getWithCache(url, p.cache)
+	if err != nil {
+		return &AreaEncountersResponse{}, err
+	}
+
+	var ae AreaEncountersResponse
+	if err := json.Unmarshal(bytes, &ae); err != nil {
+		return &AreaEncountersResponse{}, err
+	}
+
+	return &ae, nil
+}
+
 func getWithCache(url string, cache *pokecache.Cache) ([]byte, error) {
 	var bytes []byte
 
