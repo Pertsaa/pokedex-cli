@@ -12,6 +12,11 @@ type cliCommand struct {
 	callback    func() error
 }
 
+type config struct {
+	Next     string
+	Previous string
+}
+
 func main() {
 	commands := getCommands()
 
