@@ -16,6 +16,7 @@ type cliCommand struct {
 }
 
 type Config struct {
+	API      *pokeapi.PokeApi
 	Next     *string
 	Previous *string
 }
@@ -23,11 +24,8 @@ type Config struct {
 func main() {
 	commands := getCommands()
 
-	locationAreaURL := "https://pokeapi.co/api/v2/location-area/"
-
 	config := &Config{
-		Next:     &locationAreaURL,
-		Previous: nil,
+		API: pokeapi.New(),
 	}
 
 	for {
@@ -97,11 +95,7 @@ func commandExit(c *Config) error {
 }
 
 func commandMap(c *Config) error {
-	if c.Next == nil {
-		return errors.New("No next areas")
-	}
-
-	resp, err := pokeapi.GetLocationAreas(*c.Next)
+	resp, err := c.API.GetLocationAreas(c.Next)
 	if err != nil {
 		return err
 	}
@@ -121,7 +115,7 @@ func commandMapB(c *Config) error {
 		return errors.New("No previous areas")
 	}
 
-	resp, err := pokeapi.GetLocationAreas(*c.Previous)
+	resp, err := c.API.GetLocationAreas(c.Previous)
 	if err != nil {
 		return err
 	}

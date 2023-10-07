@@ -17,7 +17,18 @@ type LocationArea struct {
 	URL  string `json:"url"`
 }
 
-func GetLocationAreas(url string) (*LocationAreaResponse, error) {
+type PokeApi struct{}
+
+func New() *PokeApi {
+	return &PokeApi{}
+}
+
+func (pa *PokeApi) GetLocationAreas(pageURL *string) (*LocationAreaResponse, error) {
+	url := "https://pokeapi.co/api/v2/location-area/"
+	if pageURL != nil {
+		url = *pageURL
+	}
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return &LocationAreaResponse{}, err
@@ -25,12 +36,12 @@ func GetLocationAreas(url string) (*LocationAreaResponse, error) {
 
 	defer resp.Body.Close()
 
-	var locationAreaResponse LocationAreaResponse
+	var lr LocationAreaResponse
 
-	err = json.NewDecoder(resp.Body).Decode(&locationAreaResponse)
+	err = json.NewDecoder(resp.Body).Decode(&lr)
 	if err != nil {
 		return &LocationAreaResponse{}, err
 	}
 
-	return &locationAreaResponse, nil
+	return &lr, nil
 }
