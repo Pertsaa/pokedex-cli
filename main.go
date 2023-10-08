@@ -26,7 +26,11 @@ type Config struct {
 }
 
 type Pokemon struct {
-	Name string
+	Name   string
+	Height int
+	Weight int
+	Stats  map[string]int
+	Types  []string
 }
 
 func main() {
@@ -188,8 +192,27 @@ func commandCatch(c *Config, args ...string) error {
 
 	if rand.Intn(resp.BaseExperience) < 40 {
 		fmt.Printf("%s was caught!\n", args[0])
+
+		stats := make(map[string]int)
+		for _, stat := range resp.Stats {
+			stats[stat.Stat.Name] = stat.BaseStat
+		}
+
+		types := make([]string, len(resp.Types))
+		for i, t := range resp.Types {
+			types[i] = t.Type.Name
+		}
+
+		if c.Pokedex == nil {
+			c.Pokedex = make(map[string]Pokemon)
+		}
+
 		c.Pokedex[args[0]] = Pokemon{
-			Name: args[0],
+			Name:   resp.Name,
+			Height: resp.Height,
+			Weight: resp.Weight,
+			Stats:  stats,
+			Types:  types,
 		}
 	} else {
 		fmt.Printf("%s escaped!\n", args[0])
