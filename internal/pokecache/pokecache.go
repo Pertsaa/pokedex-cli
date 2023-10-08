@@ -1,7 +1,6 @@
 package pokecache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -18,7 +17,6 @@ type cacheEntry struct {
 }
 
 func New(cacheDuration time.Duration) *Cache {
-	fmt.Println(cacheDuration)
 	c := &Cache{
 		entries:  make(map[string]cacheEntry),
 		duration: cacheDuration,

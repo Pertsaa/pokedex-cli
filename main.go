@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -86,6 +87,11 @@ func getCommands() map[string]cliCommand {
 			description: "Explore area for pokemon",
 			callback:    commandExplore,
 		},
+		"catch": {
+			name:        "catch <pokemon>",
+			description: "Try to catch a pokemon",
+			callback:    commandCatch,
+		},
 	}
 }
 
@@ -158,6 +164,27 @@ func commandExplore(c *Config, args ...string) error {
 	fmt.Println("Found Pokemon:")
 	for _, encounter := range resp.Encounters {
 		fmt.Printf("- %s\n", encounter.Pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandCatch(c *Config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("Invalid args")
+	}
+
+	resp, err := c.API.GetPokemon(args[0])
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Throwing a Pokeball at %s...\n", args[0])
+
+	if rand.Intn(resp.BaseExperience) < 40 {
+		fmt.Printf("%s was caught!\n", args[0])
+	} else {
+		fmt.Printf("%s escaped!\n", args[0])
 	}
 
 	return nil
