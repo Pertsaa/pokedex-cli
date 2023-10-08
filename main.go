@@ -22,6 +22,11 @@ type Config struct {
 	API      *pokeapi.PokeApi
 	Next     *string
 	Previous *string
+	Pokedex  map[string]Pokemon
+}
+
+type Pokemon struct {
+	Name string
 }
 
 func main() {
@@ -183,6 +188,9 @@ func commandCatch(c *Config, args ...string) error {
 
 	if rand.Intn(resp.BaseExperience) < 40 {
 		fmt.Printf("%s was caught!\n", args[0])
+		c.Pokedex[args[0]] = Pokemon{
+			Name: args[0],
+		}
 	} else {
 		fmt.Printf("%s escaped!\n", args[0])
 	}
